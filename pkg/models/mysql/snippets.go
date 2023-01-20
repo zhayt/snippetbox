@@ -50,10 +50,11 @@ func (m *SnippetModel) Latest() ([]*models.Snippet, error) {
 	rows, err := m.DB.Query(stmt)
 	if err != nil {
 		return nil, err
+		return nil, err
 	}
 	defer rows.Close()
 
-	snippets := []*models.Snippet{}
+	snippets := make([]*models.Snippet, 0)
 	for rows.Next() {
 		s := &models.Snippet{}
 		err = rows.Scan(&s.ID, &s.Title, &s.Content, &s.Created, &s.Expires)
