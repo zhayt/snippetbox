@@ -77,11 +77,16 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 		errors["expires"] = "This field is invalid"
 	}
 
+	// check do we have any errors from client input data
+	// if we have any validation errors we re-display create.page.html template
 	if len(errors) > 0 {
-		fmt.Fprint(w, errors)
+		app.render(w, r, "create.page.html", &templateData{
+
+			FormErrors: errors,
+			FormData:   r.PostForm,
+		})
 		return
 	}
-
 	id, err := app.snippets.Insert(title, content, expires)
 	if err != nil {
 		app.serverError(w, err)
