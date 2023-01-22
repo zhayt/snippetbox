@@ -5,6 +5,8 @@ import (
 	"github.com/zhayt/snippetbox-full-version/pkg/models"
 	"net/http"
 	"strconv"
+	"strings"
+	"unicode/utf8"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -52,6 +54,33 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 	title := r.PostForm.Get("title")
 	content := r.PostForm.Get("content")
 	expires := r.PostForm.Get("expires")
+
+	// to hold any validation errors
+	errors := make(map[string]string)
+
+	// check title value
+	if strings.TrimSpace(title) == "" {
+		errors["title"] = "This field cannot be blank"
+	} else if utf8.RuneCountInString(title) > 100 {
+		errors["title"] = "This field is too long (maximum is 100 characters)"
+	}
+
+	// check content value
+	if strings.TrimSpace(content) == "" {
+		errors["content"] = "This field cannot be blank"
+	}
+
+	// check expires value
+	if strings.TrimSpace(expires) == "" {
+		errors["expires"] = "This field cannot be blank"
+	} else if expires != "365" && expires != "7" && expires != "1" {
+		errors["expires"] = "This field is invalid"
+	}
+
+	if len(errors) > 0 {
+		fmt.Fprint(w, errors)
+		return
+	}
 
 	id, err := app.snippets.Insert(title, content, expires)
 	if err != nil {
