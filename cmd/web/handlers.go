@@ -43,10 +43,15 @@ func (app *application) createSnippetForm(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
 
-	title := ""
-	content := ""
-	expires := ""
+	title := r.PostForm.Get("title")
+	content := r.PostForm.Get("content")
+	expires := r.PostForm.Get("expires")
 
 	id, err := app.snippets.Insert(title, content, expires)
 	if err != nil {
