@@ -4,16 +4,19 @@ import (
 	"database/sql"
 	"flag"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/golangcollege/sessions"
 	"github.com/zhayt/snippetbox-full-version/pkg/models/mysql"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 type application struct {
 	errorLog      *log.Logger
 	infoLog       *log.Logger
+	session       *sessions.Session
 	snippets      *mysql.SnippetModel
 	templateCache map[string]*template.Template
 }
@@ -21,6 +24,7 @@ type application struct {
 func main() {
 	addr := flag.String("addr", ":9000", "HTTP network address")
 	dsn := flag.String("dsn", "web1:@/snippetbox?parseTime=true", "MYSQL data source")
+	secret := flag.String("secret", "asYc#erofka81-VcasYc#erofka81-Vc", "Secret key for session")
 	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
@@ -37,9 +41,16 @@ func main() {
 		errorLog.Fatal(err)
 	}
 
+	// Use the sessions.New to initialize a new session manager
+	// passing in the secret key as the parameter. Then we configure it so
+	// session always expires after 12 hours
+	session := sessions.New([]byte(*secret))
+	session.Lifetime = 12 * time.Hour
+
 	app := &application{
 		errorLog:      errorLog,
 		infoLog:       infoLog,
+		session:       session,
 		snippets:      &mysql.SnippetModel{DB: db},
 		templateCache: templateCache,
 	}
