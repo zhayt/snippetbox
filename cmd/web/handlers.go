@@ -83,7 +83,44 @@ func (app *application) singupUserForm(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) singupUser(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Create a new user...")
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	// Validate the form content using the form helper
+	form := forms.New(r.PostForm)
+	form.Required("name", "email", "password")
+	form.MatchesPattern("email", forms.EmailRX)
+	form.MinLength("password", 10)
+
+	// Check do have any errors, redisplay the signup form.
+	if !form.Valid() {
+		app.render(w, r, "signup.page.html", &templateData{Form: form})
+		return
+	}
+
+	// Try to create a new user record in the db.
+	// If the email already exist add an error message to the form and re-display it.
+	err = app.users.Insert(form.Get("name"), form.Get("email"), form.Get("password"))
+	if err == models.ErrDuplicateEmail {
+		form.Errors.Add("email", "Address is already in use")
+		app.render(w, r, "signup.page.html", &templateData{
+			Form: form,
+		})
+		return
+	} else if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	// Otherwise add a confirmation flash message to the session confirming
+	// their signup worked and asking them to log in.
+	app.session.Put(r, "flash", "Your signup was successful. Please log in.")
+
+	// And redirect the user to the login page.
+	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 }
 
 func (app *application) singinUserForm(w http.ResponseWriter, r *http.Request) {
