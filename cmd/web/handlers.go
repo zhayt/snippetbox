@@ -124,13 +124,13 @@ func (app *application) singupUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // Shows sign-in form
-func (app *application) signinUserForm(w http.ResponseWriter, r *http.Request) {
+func (app *application) loginUserForm(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, "login.page.html", &templateData{
 		Form: forms.New(nil),
 	})
 }
 
-func (app *application) singinUser(w http.ResponseWriter, r *http.Request) {
+func (app *application) loginUser(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)

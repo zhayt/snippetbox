@@ -22,8 +22,8 @@ func (app *application) routes() http.Handler {
 	mux.Post("/user/signup", dynamicMiddelware.ThenFunc(app.singupUser))
 
 	// user signin
-	mux.Get("/user/login", dynamicMiddelware.ThenFunc(app.signinUserForm))
-	mux.Post("/user/login", dynamicMiddelware.ThenFunc(app.singinUser))
+	mux.Get("/user/login", dynamicMiddelware.ThenFunc(app.loginUserForm))
+	mux.Post("/user/login", dynamicMiddelware.ThenFunc(app.loginUser))
 
 	mux.Post("/user/logout", dynamicMiddelware.ThenFunc(app.logoutUser))
 
