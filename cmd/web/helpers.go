@@ -27,6 +27,7 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 	if td == nil {
 		td = &templateData{}
 	}
+	td.AuthenticatedUser = app.authenticaticatedUser(r)
 	td.CurrentYear = time.Now().Year()
 	// Add the flash message to the template data, if one exists
 	td.Flash = app.session.PopString(r, "flash")
@@ -48,4 +49,10 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, name stri
 		return
 	}
 	buf.WriteTo(w)
+}
+
+// The authenticaticatedUser method returns the ID of the current user from the
+// session, or zero if the request is from an unauthenticated user.
+func (app *application) authenticaticatedUser(r *http.Request) int {
+	return app.session.GetInt(r, "userID")
 }
