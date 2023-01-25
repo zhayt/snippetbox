@@ -123,8 +123,11 @@ func (app *application) singupUser(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 }
 
-func (app *application) singinUserForm(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Display the user login form...")
+// Shows sign-in form
+func (app *application) signinUserForm(w http.ResponseWriter, r *http.Request) {
+	app.render(w, r, "login.page.html", &templateData{
+		Form: forms.New(nil),
+	})
 }
 
 func (app *application) singinUser(w http.ResponseWriter, r *http.Request) {
