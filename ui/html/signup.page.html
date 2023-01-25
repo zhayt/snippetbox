@@ -10,11 +10,11 @@
         {{with .Errors.Get "name"}}
             <label class="error">{{.}}</label>
         {{end}}
-        <input type="text" name="name" value='.Get "name"'>
+        <input type="text" name="name" value='{{.Get "name"}}'>
     </div>
     <div>
         <label>Email:</label>
-        {{with .Errors.Get "email"}
+        {{with .Errors.Get "email"}}
             <label class="error">{{.}}</label>
         {{end}}
         <input type="email" name="email" value='{{.Get "email"}}'>
