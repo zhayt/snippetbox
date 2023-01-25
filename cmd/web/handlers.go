@@ -77,8 +77,11 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) singupUserForm(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Display the user singup form...")
+	app.render(w, r, "signup.page.html", &templateData{
+		Form: forms.New(nil),
+	})
 }
+
 func (app *application) singupUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Create a new user...")
 }
