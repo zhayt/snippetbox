@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/justinas/nosurf"
+	"github.com/zhayt/snippetbox-full-version/pkg/models"
 	"net/http"
 	"runtime/debug"
 	"time"
@@ -55,8 +56,12 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, name stri
 	buf.WriteTo(w)
 }
 
-// The authenticaticatedUser method returns the ID of the current user from the
-// session, or zero if the request is from an unauthenticated user.
-func (app *application) authenticaticatedUser(r *http.Request) int {
-	return app.session.GetInt(r, "userID")
+// The authenticaticatedUser method returns the User struct of the current user from the
+// session, or nil if the request is from an unauthenticated user.
+func (app *application) authenticaticatedUser(r *http.Request) *models.User {
+	user, ok := r.Context().Value(contextKeyUser).(*models.User)
+	if !ok {
+		return nil
+	}
+	return user
 }
