@@ -27,6 +27,9 @@ func (app *application) routes() http.Handler {
 
 	mux.Post("/user/logout", dynamicMiddleware.ThenFunc(app.logoutUser))
 
+	// Register the ping handler function as the handler for the GET /ping route.
+	mux.Get("/ping", http.HandlerFunc(ping))
+
 	// static files
 	mux.Get("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./ui/static"))))
 

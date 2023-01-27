@@ -1,8 +1,14 @@
 run:
 	find ./cmd/web/ -not -name "*_test.go" | xargs -I % go run %
 
-test:
-	go test -v ./cmd/web
+test-humanData:
+	go test -v -run='^TestHumanDate/UTC|CET' ./cmd/web
 
-all-test:
-	go test ./...
+test-ping:
+	go test -v -run="^TestPing" ./cmd/web
+
+test-middleware:
+	 go test -v -run="^TestMiddleware" ./cmd/web
+
+all-tests:
+	go test -v ./...
