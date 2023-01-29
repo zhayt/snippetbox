@@ -3,12 +3,15 @@ package main
 import (
 	"github.com/golangcollege/sessions"
 	"github.com/zhayt/snippetbox-full-version/pkg/models/mock"
+	"html"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
+	"net/url"
+	"regexp"
 	"testing"
 	"time"
 )
@@ -36,6 +39,23 @@ func newTestApplication(t *testing.T) *application {
 		templateCache: templateCache,
 		users:         &mock.UserModel{},
 	}
+}
+
+// Define a regular expression which captures the CSRF token value from the
+// HTML for our user signup page
+var csrfTokenRX = regexp.MustCompile(`<input type="hidden" name="csrf_token" value="(.+?)">`)
+
+func extractCSRFToken(t *testing.T, body []byte) string {
+	// Use the FindSubmatch method to extract the token from the HTML body.
+	// Note that this returns an array with the entire matched patten in the
+	// first position, and the values of any captured data in the subsequent
+	// positions.
+	matched := csrfTokenRX.FindSubmatch(body)
+	if len(matched) < 2 {
+		t.Fatal("mo csrf token found in body")
+	}
+
+	return html.UnescapeString(string(matched[1]))
 }
 
 // testServer anonymously embeds a httptest.Server instance.
@@ -82,5 +102,24 @@ func (ts *testServer) get(t *testing.T, urlPath string) (int, http.Header, []byt
 		t.Fatal(err)
 	}
 
+	return rs.StatusCode, rs.Header, body
+}
+
+// sending POST request to the test server
+// url.Values object which can contain any data that you want to send in the request body.
+func (ts *testServer) postFrom(t *testing.T, urlPath string, form url.Values) (int, http.Header, []byte) {
+	rs, err := ts.Client().PostForm(ts.URL+urlPath, form)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Read the response body
+	defer rs.Body.Close()
+	body, err := io.ReadAll(rs.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Return the response status, headers and body.
 	return rs.StatusCode, rs.Header, body
 }

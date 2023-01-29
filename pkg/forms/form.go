@@ -2,13 +2,14 @@ package forms
 
 import (
 	"fmt"
+	"net/mail"
 	"net/url"
 	"regexp"
 	"strings"
 	"unicode/utf8"
 )
 
-var EmailRX = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+var EmailRX = regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
 
 type Form struct {
 	url.Values
@@ -73,6 +74,10 @@ func (f *Form) MatchesPattern(field string, pattern *regexp.Regexp) {
 	value := f.Get(field)
 	if value == "" {
 		return
+	}
+	_, err := mail.ParseAddress(value)
+	if err != nil {
+		f.Errors.Add(field, "This field invalid")
 	}
 	if !pattern.MatchString(value) {
 		f.Errors.Add(field, "This field invalid")
